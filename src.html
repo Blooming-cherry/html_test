@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+    <style>
+        /* ==========================================================================
+           设计令牌 · 水蓝 × 暖陶（Aqua × Clay）
+           --------------------------------------------------------------------------
+           第 1 层｜原始色板 primitive：具体色值只允许出现在这里
+           第 2 层｜语义变量 semantic：页面样式只引用这一层，不直接写色值
+           第 3 层｜组件变量 component：表格、列表等局部组件的取值
+           规则：冷色（水蓝）负责结构、链接、进度与选中；暖色（暖陶）负责强调、
+                 标题、提示与悬停温度。暖色占比控制在 10% 左右，越少越贵。
+           ========================================================================== */
+        :root {
+            color-scheme: light;
+
+            /* ---- 1.1 水蓝 Aqua：低饱和、偏青，像浅水 ---- */
+            --aqua-50: #F0F8FA;
+            --aqua-100: #DCEFF4;
+            --aqua-200: #B9DFE8;
+            --aqua-300: #8CC9D8;
+            --aqua-400: #5AADC2;
+            --aqua-500: #3492A9;
+            --aqua-600: #2A778C;
+            --aqua-700: #245F71;
+            --aqua-800: #1F4C5B;
+            --aqua-900: #1B3E4A;
+
+            /* ---- 1.2 暖陶 Clay：带红的陶土色，避免发橙 ---- */
+            --clay-50: #FDF3EE;
+            --clay-100: #F8E1D6;
+            --clay-200: #EFC5B1;
+            --clay-300: #E0A184;
+            --clay-400: #CE7C57;
+            --clay-500: #BC633E;
+            --clay-600: #A25032;
+            --clay-700: #84412A;
+            --clay-800: #6B3624;
+            --clay-900: #562C1E;
+
+            /* ---- 1.3 中性墨色 Ink：微微带青，和水蓝同族，避免脏灰 ---- */
+            --ink-50: #F1F5F5;
+            --ink-100: #E3EBEB;
+            --ink-200: #C9D7D8;
+            --ink-300: #A5BABB;
+            --ink-400: #78908F;
+            --ink-500: #5A7779;
+            --ink-600: #466366;
+            --ink-700: #334E51;
+            --ink-800: #24383A;
+            --ink-900: #182A2C;
+
+            /* ---- 1.4 底色：暖白纸，比纯白更耐看，也让陶色不显突兀 ---- */
+            --paper: #FBFAF7;
+            --white: #FFFFFF;
+
+            /* ---- 2.1 表面与文字 ---- */
+            --color-bg: var(--paper);
+            --color-surface: var(--white);
+            --color-surface-muted: var(--aqua-50);
+            --color-surface-warm: var(--clay-50);
+            --color-border: var(--ink-100);
+            --color-border-strong: var(--aqua-200);
+
+            --color-text: var(--ink-900);
+            --color-text-muted: var(--ink-500);
+            --color-text-subtle: var(--ink-400);
+            --color-heading: var(--ink-900);
+
+            /* ---- 2.2 主色：水蓝（用于结构、装饰条、链接、主要按钮） ---- */
+            --color-primary: var(--aqua-600);
+            --color-primary-hover: var(--aqua-700);
+            --color-primary-soft: var(--aqua-100);
+            --color-primary-deep: var(--aqua-800);
+            --color-on-primary: #FFFFFF;
+
+            /* ---- 2.3 强调色：暖陶（用于标题、重点、悬停温度） ---- */
+            --color-accent: var(--clay-500);
+            /* 大字号 / 装饰 */
+            --color-accent-strong: var(--clay-600);
+            /* 正文级文字、色块底 */
+            --color-accent-hover: var(--clay-700);
+            --color-accent-soft: var(--clay-100);
+            --color-on-accent: #FFFFFF;
+
+            /* ---- 2.4 交互与阴影 ---- */
+            --color-ring: rgba(52, 146, 169, 0.35);
+            --shadow-sm: 0 2px 6px rgba(24, 42, 44, 0.06);
+            --shadow-md: 0 4px 12px rgba(24, 42, 44, 0.10);
+
+            /* ---- 3. 组件层 ---- */
+            --table-bg: var(--color-surface-muted);
+            --table-border: var(--color-border-strong);
+            --table-head-bg: var(--color-primary-soft);
+            --table-head-text: var(--color-primary-deep);
+
+            --list-bg: var(--color-surface);
+            --list-border: var(--color-border);
+            --list-bg-hover: var(--color-surface-warm);
+
+            /* ---- 2.5 点缀色：樱粉（纯装饰，不承载文字） ---- */
+            --color-highlight: #FFC0CB;
+            /* 对纸底约 1.2:1，只能做色块/描边，不能做文字 */
+        }
+
+        ::selection {
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary-deep);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 2;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+        }
+
+        h1 {
+            color: var(--color-accent-strong);
+            margin: 2rem 0 1rem;
+            position: relative;
+            padding-left: 0.8rem;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: var(--color-heading);
+            margin: 2rem 0 1rem;
+            /* 上下间距，区分不同内容块 */
+            position: relative;
+            /* 为伪元素定位做准备 */
+            padding-left: 0.8rem;
+            /* 左侧内边距，为装饰线预留空间 */
+        }
+
+        /* 标题左侧强调条：h1 / h2 共用一套几何与同一个点缀色 */
+        h1::before,
+        h2::before {
+            content: '';
+            /* 伪元素必须有content属性 */
+            position: absolute;
+            /* 绝对定位，相对于标题本身 */
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            /* 垂直居中 */
+            width: 6px;
+            /* 线条宽度 */
+            height: 1.15em;
+            /* 高度跟随字号：大标题不会被拉成一条长棍 */
+            border-radius: 100px;
+            /* 轻微圆角，更柔和 */
+            background-color: var(--color-highlight);
+            /* 樱粉点缀：只做装饰，不参与文字对比度 */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-color: var(--table-border);
+            background-color: var(--table-bg);
+            margin: 20px 0;
+            color: var(--color-text);
+        }
+
+        table td:hover {
+            transform: translateX(5px);
+            /* 轻微右移，增强交互感 */
+            box-shadow: var(--shadow-md);
+            /* 阴影加深，突出当前项 */
+        }
+
+        table th:hover {
+            transform: translateX(5px);
+            /* 轻微右移，增强交互感 */
+            box-shadow: var(--shadow-md);
+            /* 阴影加深，突出当前项 */
+        }
+
+        ul {
+            list-style-type: none;
+            /* 去除默认列表符号 */
+            padding-left: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        ul li:hover {
+            transform: translateX(5px);
+            /* 轻微右移，增强交互感 */
+            box-shadow: var(--shadow-md);
+            /* 阴影加深，突出当前项 */
+            background-color: var(--list-bg-hover);
+            /* 悬停时透出一点暖意，呼应强调色 */
+        }
+
+        ul li {
+            padding: 0.8rem;
+            /* 内边距，让内容有呼吸空间 */
+            margin-bottom: 0.8rem;
+            /* 列表项间距 */
+            background-color: var(--list-bg);
+            /* 白色背景，突出列表项 */
+            border: 1px solid var(--list-border);
+            /* 浅色描边，让卡片从暖白底上浮起来 */
+            border-radius: 8px;
+            /* 圆角，柔和效果 */
+            box-shadow: var(--shadow-sm);
+            /* 轻微阴影 */
+            transition: all 0.3s ease;
+            /* 过渡动画，悬停时变化 */
+        }
+
+        th,
+        td {
+            border: 1px solid var(--table-border);
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        th {
+            background-color: var(--table-head-bg);
+            color: var(--table-head-text);
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        img {
+            transition: transform 0.8s ease;
+            padding: 20px;
+        }
+
+        img:hover {
+            transform: scale(1.2) rotate(1.0turn);
+        }
+
+        th a {
+            display: inline-block;
+            color: #1F4C5B;
+            text-decoration: none;
+            transition: transform 2.0s ease;
+            margin: auto;
+        }
+
+        th a:hover {
+            transform: rotate(3.0turn) scale(2.0);
+        }
+
+        .one-link {
+            display: inline-block;
+            margin: 30px;
+            transition: transform 5.0s ease;
+            padding-left: 50px;
+        }
+
+        .one-link:hover {
+            transform: scale(2.0) rotate(5.0turn);
+        }
+
+        .kmt-entry {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border: 0;
+            border-radius: 999px;
+            background-color: var(--color-primary);
+            color: var(--color-on-primary);
+            font: inherit;
+            line-height: 1.4;
+            text-decoration: none;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kmt-entry:hover {
+            background-color: var(--color-primary-hover);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .kmt-entry:focus-visible {
+            outline: 3px solid var(--color-ring);
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <img src="../src/icon.svg" alt="图标" width="240" height="240" class="乐乐">
+    <h1>Recipe</h1>
+    <h1>高端的食材往往只需要简单的烹饪</h1>
+    <h2>所需材料</h2>
+    <table>
+        <tr>
+            <th scope="col"><a href="../src/placeholder-aau.webp">你个乐子</a></th>
+            <th scope="col"><a href="#beizi">你个悲子</a></th>
+            <th scope="col"><a href="#feijibei">你个非基杯</a></th>
+        </tr>
+        <tr>
+            <td>你个乐子</td>
+            <td>你个悲子</td>
+            <td>你个非基杯</td>
+        </tr>
+        <tr>
+            <td>你个乐子</td>
+            <td>你个悲子</td>
+            <td>你个非基杯</td>
+        </tr>
+        <tr>
+            <td>你个乐子</td>
+            <td>你个悲子</td>
+            <td>你个非基杯</td>
+        </tr>
+    </table>
+
+    <h2>制作步骤</h2>
+
+    <ul>
+        <li>蒋介裤的石头</li>
+        <li>高市奶苗的枣子</li>
+        <li>望京奶的卫龙</li>
+    </ul>
+
+    <h1>臭乐乐看这里</h1>
+    <a class="one-link">
+        <h2>还没有走吗？？？</h2>
+    </a>
+    <ul>
+        <li>
+            <a class="kmt-entry"
+                href="https://www.bilibili.com/video/BV1GJ411x7h7/?spm_id_from=333.337.search-card.all.click&vd_source=22cb6f988ed1c1efea826279a16565d2">姜太公钓鱼</a>
+        </li>
+        <li>
+            <a class="kmt-entry"
+                href="https://www.bilibili.com/video/BV1Q9YX6QEF7/?spm_id_from=333.337.search-card.all.click">愿者上钩</a>
+        </li>
+        <li>
+            <a class="kmt-entry" href="kmt.html">同学你的入党申请书该填了</a>
+        </li>
+    </ul>
+</body>
+
+</html>
